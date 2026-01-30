@@ -318,5 +318,40 @@
 
         window.onload = init;
     </script>
+
+
+
+<script>
+(function () {
+  const originalCreateObjectURL = URL.createObjectURL;
+
+  URL.createObjectURL = function (blob) {
+    try {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const base64 = reader.result.split(',')[1];
+
+        let filename = "download_" + Date.now();
+        if (blob.type) {
+          if (blob.type.includes("html")) filename += ".html";
+          else if (blob.type.includes("json")) filename += ".json";
+          else if (blob.type.includes("zip")) filename += ".zip";
+          else if (blob.type.includes("javascript")) filename += ".js";
+          else filename += ".txt";
+        }
+
+        if (window.Android && Android.saveFile) {
+          Android.saveFile(base64, filename);
+        }
+      };
+      reader.readAsDataURL(blob);
+    } catch (e) {}
+
+    return originalCreateObjectURL(blob);
+  };
+})();
+</script>
+
+    
 </body>
 </html>
