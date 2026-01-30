@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zelvior Studio | Pro Edition</title>
+    
+    <!-- Icons & Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                }
+            }
+        }
+    </script>
+
+    <!-- CodeMirror 5 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --border-ui: rgba(255, 255, 255, 0.1);
+            --glass: rgba(10, 10, 10, 0.9);
+        }
+
+        body { 
+            background-color: var(--bg-primary); 
+            color: white; 
+            height: 100vh; 
+            width: 100vw;
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .glass { background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
+        .glass-border { border: 1px solid var(--border-ui); }
+        
+        /* CodeMirror Custom Monochrome */
+        .CodeMirror { height: 100%; font-family: 'JetBrains Mono', monospace; font-size: 13px; background: transparent !important; color: #fff; }
+        .CodeMirror-gutters { background: transparent !important; border-right: 1px solid var(--border-ui) !important; }
+        .CodeMirror-linenumber { color: rgba(255,255,255,0.2) !important; }
+        .CodeMirror-cursor { border-left: 2px solid #fff !important; }
+
+        /* SCROLLBAR ENGINE */
+        .custom-scroll { overflow-y: auto !important; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* Split Gutter */
+        .gutter { background-color: transparent; cursor: col-resize; position: relative; z-index: 10; }
+        .gutter::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border-ui); }
+
+        .project-item { transition: all 0.2s ease; border-left: 3px solid transparent; }
+        .project-item.active { background: rgba(255,255,255,0.08); border-left-color: white; }
+
+        @media (max-width: 768px) {
+            #main-layout { flex-direction: column; height: calc(100% - 80px); }
+            #editor-pane, #preview-pane { width: 100% !important; height: 50% !important; flex: none; }
+            #sidebar { width: 85%; }
+        }
+
+        .social-link { font-size: 11px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 12px; padding: 12px 16px; transition: all 0.2s; border-radius: 8px; }
+        .social-link:hover { color: white; background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- Sidebar Mobile Overlay -->
+    <div id="sidebar-overlay" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/70 z-[55] hidden opacity-0 transition-opacity"></div>
+
+    <div id="main-layout" class="flex-1 flex overflow-hidden relative pb-[80px] md:pb-0">
+        
+        <!-- SIDEBAR WITH ROBUST SCROLLING -->
+        <aside id="sidebar" class="w-72 glass border-r border-white/10 flex flex-col fixed md:relative z-[60] h-full transition-transform -translate-x-full md:translate-x-0 bg-black overflow-hidden">
+            <!-- Fixed Header -->
+            <div class="p-6 shrink-0 border-b border-white/10 bg-black/20">
+                <div class="flex items-center gap-3 mb-1">
+                    <i class="fas fa-cube text-white text-lg"></i>
+                    <span class="text-sm font-black tracking-[0.2em] uppercase">Zelvior Studio</span>
+                </div>
+                <span class="text-[8px] opacity-40 uppercase tracking-widest font-black">System Version 3.0</span>
+            </div>
+
+            <!-- Scrollable Body Container -->
+            <div class="flex-1 overflow-y-auto custom-scroll flex flex-col">
+                <div class="p-4 flex justify-between items-center opacity-40 bg-white/[0.02]">
+                    <span class="text-[9px] font-black tracking-widest uppercase">My Projects</span>
+                    <button onclick="createNewProject()" class="hover:text-white p-1 transition-colors"><i class="fas fa-folder-plus"></i></button>
+                </div>
+                
+                <div id="project-list" class="shrink-0">
+                    <!-- Projects -->
+                </div>
+
+                <!-- Info Section -->
+                <div class="mt-8 border-t border-white/10 p-4 space-y-1">
+                    <span class="text-[9px] opacity-30 uppercase tracking-[0.2em] font-black px-4 mb-3 block">Developer Hub</span>
+                    <a href="https://github.com/iamthevexo" target="_blank" class="social-link"><i class="fab fa-github"></i> GitHub Profile</a>
+                    <a href="https://youtube.com/@thevexo.zelvior" target="_blank" class="social-link"><i class="fab fa-youtube"></i> YouTube Channel</a>
+                    <a href="https://web.sketchub.in/u/Zelvior" target="_blank" class="social-link"><i class="fas fa-pencil-ruler"></i> Sketchub Profile</a>
+                    <a href="https://forms.gle/nhRCZsUxjyvarTHV7" target="_blank" class="social-link"><i class="fas fa-heart text-white/30"></i> Donation Support</a>
+                    <a href="mailto:Zelvior@proton.me" class="social-link"><i class="fas fa-envelope"></i> Contact Email</a>
+                </div>
+
+                <!-- Footer in Sidebar -->
+                <div class="mt-auto p-6 bg-white/[0.03] border-t border-white/5">
+                    <p class="text-[8px] opacity-30 uppercase font-black tracking-widest">Built & Designed By</p>
+                    <p class="text-xs font-black mt-1 text-white uppercase tracking-normal">Zelvior</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <section id="editor-pane" class="flex-1 flex flex-col bg-black border-r border-white/10 overflow-hidden">
+            <div class="flex bg-black border-b border-white/5 overflow-x-auto no-scrollbar shrink-0">
+                <button onclick="switchTab('html')" id="tab-html" class="tab-btn px-6 py-4 text-[9px] font-bold tracking-widest uppercase border-r border-white/5 opacity-30 flex items-center gap-2 transition-all"><i class="fab fa-html5"></i> HTML</button>
+                <button onclick="switchTab('css')" id="tab-css" class="tab-btn px-6 py-4 text-[9px] font-bold tracking-widest uppercase border-r border-white/5 opacity-30 flex items-center gap-2 transition-all"><i class="fab fa-css3"></i> CSS</button>
+                <button onclick="switchTab('js')" id="tab-js" class="tab-btn px-6 py-4 text-[9px] font-bold tracking-widest uppercase border-r border-white/5 opacity-30 flex items-center gap-2 transition-all"><i class="fab fa-js"></i> JS</button>
+                <button onclick="switchTab('json')" id="tab-json" class="tab-btn px-6 py-4 text-[9px] font-bold tracking-widest uppercase border-r border-white/5 opacity-30 flex items-center gap-2 transition-all"><i class="fas fa-database"></i> DATA</button>
+            </div>
+            <div class="flex-1 relative overflow-hidden">
+                <div id="editor-html" class="absolute inset-0 h-full w-full"></div>
+                <div id="editor-css" class="absolute inset-0 h-full w-full hidden"></div>
+                <div id="editor-js" class="absolute inset-0 h-full w-full hidden"></div>
+                <div id="editor-json" class="absolute inset-0 h-full w-full hidden"></div>
+            </div>
+        </section>
+
+        <section id="preview-pane" class="flex-1 flex flex-col bg-white overflow-hidden relative">
+            <div class="h-10 bg-black border-b border-white/10 flex items-center px-4 justify-between shrink-0">
+                <span class="text-[8px] font-black tracking-widest text-white/40 uppercase flex items-center gap-2"><i class="fas fa-eye"></i> Live Preview</span>
+                <button onclick="toggleConsole()" class="text-[8px] text-white/40 hover:text-white uppercase font-bold px-3 py-1 glass rounded-full border border-white/10 transition-all">Log Center</button>
+            </div>
+            <div class="flex-1 relative bg-white">
+                <iframe id="preview-frame" class="w-full h-full border-none"></iframe>
+                <div id="console-overlay" class="absolute bottom-0 left-0 right-0 h-1/2 bg-black border-t border-white/20 translate-y-full transition-transform duration-300 z-50 flex flex-col">
+                    <div class="px-6 py-3 border-b border-white/10 flex justify-between items-center bg-black">
+                        <span class="text-[8px] font-bold opacity-30 uppercase tracking-widest">Environment Console</span>
+                        <button onclick="toggleConsole()" class="p-1 opacity-40 hover:opacity-100"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div id="console-logs" class="flex-1 overflow-y-auto custom-scroll p-6 font-mono text-[10px] text-white/80 space-y-2"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Floating Navigation Control -->
+    <nav class="fixed bottom-0 left-0 right-0 p-4 md:p-6 z-[100] pointer-events-none">
+        <div class="max-w-screen-xl mx-auto h-16 glass glass-border rounded-2xl flex items-center justify-between px-6 pointer-events-auto shadow-[0_25px_60px_rgba(0,0,0,0.9)]">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar(true)" class="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-all">
+                    <i class="fas fa-bars text-sm"></i>
+                </button>
+                <div class="h-6 w-px bg-white/10 hidden sm:block"></div>
+                <div class="hidden sm:flex flex-col">
+                    <span class="text-[7px] opacity-30 uppercase font-black tracking-widest">Module</span>
+                    <span id="current-project-name" class="text-[10px] font-bold uppercase truncate max-w-[150px]">...</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="compileAndRun()" class="px-8 py-3 rounded-xl bg-white text-black text-[10px] font-black uppercase hover:opacity-90 active:scale-95 transition-all flex items-center gap-2">
+                    <i class="fas fa-bolt text-[9px]"></i> Compile
+                </button>
+                <button onclick="downloadProject()" class="w-12 h-12 flex items-center justify-center rounded-xl border border-white/20 hover:bg-white/5 transition-all text-white/50 hover:text-white">
+                    <i class="fas fa-cloud-download-alt text-[12px]"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+
+    <script>
+        const KEY = 'zel_v6_stor';
+        let projects = JSON.parse(localStorage.getItem(KEY)) || [
+            { id: '1', name: 'CORE_INTERFACE', html: '<div class="main"><h1>ZELVIOR</h1></div>', css: 'body{background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}h1{letter-spacing:10px;}', js: 'console.log("Kernel Load...");', json: '{}' }
+        ];
+        let currentId = localStorage.getItem('zel_active_v6') || '1';
+        const editors = {};
+
+        function init() {
+            const config = { lineNumbers: true, theme: 'monochrome', lineWrapping: true, viewportMargin: Infinity };
+            ['html', 'css', 'js', 'json'].forEach(t => {
+                const m = t==='js'?'javascript':t==='json'?'application/json':t==='html'?'htmlmixed':'css';
+                editors[t] = CodeMirror(document.getElementById(`editor-${t}`), {...config, mode: m});
+                editors[t].on('change', save);
+            });
+            load(currentId);
+            if(window.innerWidth > 768) Split(['#editor-pane', '#preview-pane'], { sizes: [50, 50], gutterSize: 2 });
+        }
+
+        function save() {
+            const p = projects.find(x => x.id === currentId);
+            if(p) {
+                p.html = editors.html.getValue();
+                p.css = editors.css.getValue();
+                p.js = editors.js.getValue();
+                p.json = editors.json.getValue();
+                localStorage.setItem(KEY, JSON.stringify(projects));
+            }
+        }
+
+        function load(id) {
+            const p = projects.find(x => x.id === id);
+            if(!p) return;
+            currentId = id;
+            localStorage.setItem('zel_active_v6', id);
+            document.getElementById('current-project-name').innerText = p.name;
+            editors.html.setValue(p.html);
+            editors.css.setValue(p.css);
+            editors.js.setValue(p.js);
+            editors.json.setValue(p.json);
+            renderProjects();
+            compileAndRun();
+            toggleSidebar(false);
+        }
+
+        function createNewProject() {
+            const n = prompt("Module Identity:", "UNNAMED_" + Math.floor(Math.random()*1000));
+            if(!n) return;
+            const id = 'p' + Date.now();
+            projects.push({id, name: n, html: '<h1>'+n+'</h1>', css: 'body{background:#000;color:#fff;}', js: '', json: '{}'});
+            load(id);
+        }
+
+        function deleteProject(id, e) {
+            e.stopPropagation();
+            if(projects.length <= 1) return;
+            if(!confirm("Destroy Module?")) return;
+            projects = projects.filter(x => x.id !== id);
+            load(projects[0].id);
+        }
+
+        function renderProjects() {
+            const list = document.getElementById('project-list');
+            list.innerHTML = projects.map(p => `
+                <div onclick="load('${p.id}')" class="project-item px-6 py-4 flex justify-between items-center cursor-pointer ${p.id === currentId ? 'active' : 'opacity-30 hover:opacity-100'}">
+                    <span class="text-[10px] font-black tracking-widest uppercase truncate">${p.name}</span>
+                    <button onclick="deleteProject('${p.id}', event)" class="p-2 opacity-20 hover:opacity-100 transition-opacity"><i class="fas fa-times-circle"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function switchTab(t) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.add('opacity-30'));
+            document.getElementById(`tab-${t}`).classList.remove('opacity-30');
+            Object.keys(editors).forEach(k => document.getElementById(`editor-${k}`).classList.add('hidden'));
+            document.getElementById(`editor-${t}`).classList.remove('hidden');
+            editors[t].refresh();
+        }
+
+        function toggleSidebar(open) {
+            const s = document.getElementById('sidebar');
+            const o = document.getElementById('sidebar-overlay');
+            if(open) {
+                s.classList.remove('-translate-x-full');
+                o.classList.remove('hidden');
+                setTimeout(() => o.classList.add('opacity-100'), 10);
+            } else {
+                s.classList.add('-translate-x-full');
+                o.classList.remove('opacity-100');
+                setTimeout(() => o.classList.add('hidden'), 300);
+            }
+        }
+
+        function toggleConsole() {
+            document.getElementById('console-overlay').classList.toggle('translate-y-full');
+        }
+
+        function compileAndRun() {
+            const f = document.getElementById('preview-frame');
+            const b = `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${editors.css.getValue()}</style><script>window.db=${editors.json.getValue()};const l=(m)=>(...a)=>window.parent.postMessage({t:'log',m,a},'*');console.log=l('log');console.error=l('error');<\/script></head><body>${editors.html.getValue()}<script>${editors.js.getValue()}<\/script></body></html>`;
+            f.srcdoc = b;
+        }
+
+        function downloadProject() {
+            const p = projects.find(x => x.id === currentId);
+            const content = `<!DOCTYPE html><html><head><title>${p.name}</title><style>${editors.css.getValue()}</style></head><body>${editors.html.getValue()}<script>window.db=${editors.json.getValue()};${editors.js.getValue()}<\/script></body></html>`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], {type:'text/html'}));
+            a.download = `${p.name}.html`;
+            a.click();
+        }
+
+        window.addEventListener('message', (e) => {
+            if(e.data.t === 'log') {
+                const logs = document.getElementById('console-logs');
+                const div = document.createElement('div');
+                div.className = e.data.m === 'error' ? 'text-red-500' : 'text-white/80';
+                div.innerHTML = `<span class="opacity-10 mr-3">LOG_SYSTEM</span> ${JSON.stringify(e.data.a)}`;
+                logs.appendChild(div);
+                logs.scrollTop = logs.scrollHeight;
+            }
+        });
+
+        window.onload = init;
+    </script>
+</body>
+</html>
