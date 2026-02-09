@@ -410,14 +410,15 @@
                 </div>
                 <div class="flex items-center gap-2 px-4">
                     <button onclick="formatCode()" class="text-[8px] px-3 py-1 bg-white/5 rounded hover:bg-white/10 uppercase font-bold" title="Format Code (Ctrl+Shift+F)">
-    <i class="fas fa-magic"></i> Format
-</button>
-<button onclick="clearCurrentCode()" class="text-[8px] px-3 py-1 bg-red-600/20 text-red-300 rounded hover:bg-red-600/30 uppercase font-bold" title="Clear Code">
-    <i class="fas fa-trash"></i> Clear
-</button>
-<button onclick="toggleAIPanel()" class="text-[8px] px-3 py-1 bg-purple-600/20 text-purple-300 rounded hover:bg-purple-600/30 uppercase font-bold" title="AI Assistant">
-    <i class="fas fa-robot"></i> AI
-</button>
+                        <i class="fas fa-magic"></i> Format
+                    </button>
+                    <!-- NEW CLEAR BUTTON -->
+                    <button onclick="clearCode()" class="text-[8px] px-3 py-1 bg-red-600/20 text-red-300 rounded hover:bg-red-600/30 uppercase font-bold" title="Clear Code">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <button onclick="toggleAIPanel()" class="text-[8px] px-3 py-1 bg-purple-600/20 text-purple-300 rounded hover:bg-purple-600/30 uppercase font-bold" title="AI Assistant">
+                        <i class="fas fa-robot"></i> AI
+                    </button>
                 </div>
             </div>
             <div class="flex-1 relative overflow-hidden">
@@ -916,8 +917,24 @@
             CodeMirror.commands.find(editor);
         }
 
+        function clearCode() {
+            const p = projects.find(x => x.id === currentId);
+            if(!p) return;
+            
+            if(!confirm("Are you sure you want to clear the code for this file?")) return;
+
+            const file = p.files.find(f => f.id === currentFileId);
+            if(file) {
+                const editor = getEditorForFile(file);
+                if(editor) {
+                    editor.setValue('');
+                    editor.focus();
+                }
+            }
+        }
+
         // ========================================
-        // PREVIEW & COMPILATION (FIXED)
+        // PREVIEW & COMPILATION
         // ========================================
         function compileAndRun() {
             const p = projects.find(x => x.id === currentId);
@@ -925,6 +942,7 @@
             
             // Gather all files
             let html = '', css = '', js = '', json = '{}';
+            
             p.files.forEach(f => {
                 if(f.type === 'html') html += f.content + '\n';
                 else if(f.type === 'css') css += f.content + '\n';
@@ -975,32 +993,10 @@
 </body>
 </html>`;
             
-            // FIX: Use document.write instead of srcdoc for better compatibility
-            const frameDoc = frame.contentDocument || frame.contentWindow.document;
-            frameDoc.open();
-            frameDoc.write(compiled);
-            frameDoc.close();
-        }
-
-        // ========================================
-        // NEW CLEAR BUTTON FUNCTION
-        // ========================================
-        function clearCurrentCode() {
-            const p = projects.find(x => x.id === currentId);
-            if(!p) return;
-            
-            // Optional: Confirm before clearing to prevent accidents
-            if(!confirm("Are you sure you want to clear the code in this file?")) return;
-
-            const file = p.files.find(f => f.id === currentFileId);
-            if(!file) return;
-            
-            const editor = getEditorForFile(file);
-            if(editor) {
-                editor.setValue(''); // Clears the editor
-                editor.focus();
-                save(); // Saves the empty state
-            }
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            doc.open();
+            doc.write(compiled);
+            doc.close();
         }
 
         function refreshPreview() {
@@ -1017,6 +1013,7 @@
                 document.getElementById(`preview-tab-${t}`).classList.add('text-white/40');
                 document.getElementById(`${t}-content`).classList.add('hidden');
             });
+            
             document.getElementById(`preview-tab-${tab}`).classList.add('bg-white/10', 'text-white');
             document.getElementById(`preview-tab-${tab}`).classList.remove('text-white/40');
             document.getElementById(`${tab}-content`).classList.remove('hidden');
@@ -1036,6 +1033,7 @@
                 if(!code) return;
                 
                 logToConsole('> ' + code, 'input');
+                
                 // Send to preview iframe
                 const frame = document.getElementById('preview-frame');
                 try {
@@ -1051,8 +1049,7 @@
         function logToConsole(message, type = 'log') {
             const logs = document.getElementById('console-logs');
             const div = document.createElement('div');
-            div.className = `py-1 border-b border-white/5 ${type === 'error' ? 'text-red-400' : type === 'warn' ?
-            'text-yellow-400' : type === 'input' ? 'text-green-400' : 'text-white/80'}`;
+            div.className = `py-1 border-b border-white/5 ${type === 'error' ? 'text-red-400' : type === 'warn' ? 'text-yellow-400' : type === 'input' ? 'text-green-400' : 'text-white/80'}`;
             div.innerHTML = `<span class="opacity-30 mr-2">[${new Date().toLocaleTimeString()}]</span>${message}`;
             logs.appendChild(div);
             logs.scrollTop = logs.scrollHeight;
@@ -1077,6 +1074,7 @@
                 fontSize: 13,
                 fontFamily: 'JetBrains Mono, monospace'
             });
+            
             const fitAddon = new FitAddon.FitAddon();
             terminal.loadAddon(fitAddon);
             terminal.open(container);
@@ -1109,6 +1107,7 @@
 
         function executeTerminalCommand(cmd) {
             if(!cmd) return;
+            
             const parts = cmd.split(' ');
             const command = parts[0];
             
@@ -1231,6 +1230,7 @@
             a.href = URL.createObjectURL(new Blob([content], {type:'text/html'}));
             a.download = `${p.name}.html`;
             a.click();
+            
             showToast('Downloaded as single HTML file');
         }
 
@@ -1243,13 +1243,16 @@
             p.files.forEach(f => {
                 zip.file(f.name, f.content);
             });
+            
             // Add README
             zip.file('README.md', `# ${p.name}\n\nGenerated by Zelvior Studio Pro\nDate: ${new Date().toLocaleString()}\n`);
+            
             const blob = await zip.generateAsync({type: 'blob'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = `${p.name}.zip`;
             a.click();
+            
             showToast('Downloaded as ZIP archive');
         }
 
@@ -1259,13 +1262,11 @@
                     <div class="bg-black border border-white/10 rounded-lg p-6 max-w-md" onclick="event.stopPropagation()">
                         <h3 class="text-lg font-bold mb-4">Export Project</h3>
                         <div class="space-y-3">
-                            <button onclick="downloadProject(); this.closest('.fixed').remove();"
-                            class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded text-left">
+                            <button onclick="downloadProject(); this.closest('.fixed').remove();" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded text-left">
                                 <i class="fas fa-file-code mr-2"></i> Single HTML File
                                 <div class="text-xs opacity-50 mt-1">All code in one file</div>
                             </button>
-                            <button onclick="downloadAsZip(); this.closest('.fixed').remove();"
-                            class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded text-left">
+                            <button onclick="downloadAsZip(); this.closest('.fixed').remove();" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded text-left">
                                 <i class="fas fa-file-archive mr-2"></i> ZIP Archive
                                 <div class="text-xs opacity-50 mt-1">Separate files in a folder</div>
                             </button>
@@ -1307,8 +1308,7 @@
             const list = document.getElementById('history-list');
             const currentProjectSnapshots = historySnapshots.filter(s => s.projectId === currentId);
             
-            list.innerHTML = currentProjectSnapshots.length > 0 ?
-            currentProjectSnapshots.map(snap => `
+            list.innerHTML = currentProjectSnapshots.length > 0 ? currentProjectSnapshots.map(snap => `
                 <div class="history-item" onclick="restoreSnapshot('${snap.id}')">
                     <div class="text-xs font-bold">${new Date(snap.timestamp).toLocaleString()}</div>
                     <div class="text-xs opacity-50 mt-1">${snap.files.length} files</div>
@@ -1318,11 +1318,13 @@
 
         function restoreSnapshot(snapId) {
             if(!confirm('Restore this version? Current changes will be lost.')) return;
+            
             const snapshot = historySnapshots.find(s => s.id === snapId);
             if(!snapshot) return;
             
             const p = projects.find(x => x.id === currentId);
             if(!p) return;
+            
             p.files = JSON.parse(JSON.stringify(snapshot.files));
             save();
             load(currentId);
@@ -1338,6 +1340,7 @@
             
             const name = prompt('Asset name:', url.split('/').pop());
             if(!name) return;
+            
             assets.push({
                 id: 'asset_' + Date.now(),
                 name,
@@ -1346,6 +1349,7 @@
                       url.match(/\.(js)$/i) ? 'script' : 
                       url.match(/\.(css)$/i) ? 'style' : 'other'
             });
+            
             localStorage.setItem(ASSETS_KEY, JSON.stringify(assets));
             loadAssets();
             showToast('Asset added');
@@ -1360,8 +1364,7 @@
                             <div class="text-xs font-bold">${asset.name}</div>
                             <div class="text-xs opacity-50 mt-1 truncate">${asset.url}</div>
                             <div class="mt-2 flex gap-2">
-                                <button onclick="copyAssetURL('${asset.url}')" 
-                                class="text-[10px] px-2 py-1 bg-white/5 rounded hover:bg-white/10">
+                                <button onclick="copyAssetURL('${asset.url}')" class="text-[10px] px-2 py-1 bg-white/5 rounded hover:bg-white/10">
                                     <i class="fas fa-copy"></i> Copy URL
                                 </button>
                                 ${asset.type === 'image' ? `
@@ -1419,6 +1422,7 @@
                 cmd.name.toLowerCase().includes(filter.toLowerCase()) ||
                 cmd.id.toLowerCase().includes(filter.toLowerCase())
             );
+            
             list.innerHTML = filtered.map((cmd, i) => `
                 <div class="command-item ${i === 0 ? 'active' : ''}" onclick="executeCommand('${cmd.id}')">
                     <div class="flex items-center justify-between">
@@ -1443,6 +1447,7 @@
         document.getElementById('command-input')?.addEventListener('input', (e) => {
             renderCommands(e.target.value);
         });
+
         document.getElementById('command-input')?.addEventListener('keydown', (e) => {
             if(e.key === 'Escape') {
                 closeCommandPalette();
@@ -1477,6 +1482,7 @@
                     <div class="text-sm">${message}</div>
                 </div>
             `);
+            
             input.value = '';
             chat.scrollTop = chat.scrollHeight;
             
@@ -1510,6 +1516,7 @@
                 files: p.files,
                 timestamp: Date.now()
             };
+            
             const encoded = btoa(JSON.stringify(shareData));
             const shareURL = window.location.origin + window.location.pathname + '?import=' + encoded;
             
@@ -1538,7 +1545,7 @@
         }
 
         // ========================================
-        // PWA SETUP (FIXED)
+        // PWA SETUP
         // ========================================
         function setupPWA() {
             // Create manifest
@@ -1556,14 +1563,12 @@
                     type: "image/svg+xml"
                 }]
             };
+            
             const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
             const manifestURL = URL.createObjectURL(blob);
             document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
             
-            // FIX: Service Worker registration removed because Blob URL protocols 
-            // are not supported for Service Workers in most modern browsers/webviews.
-            // This prevents the "Failed to register" error in console.
-            console.log('PWA Manifest loaded.');
+            // Note: Service Worker registration removed to prevent "Blob URL protocol not supported" errors in certain environments.
         }
 
         function installPWA() {
