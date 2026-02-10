@@ -244,6 +244,748 @@
             font-size: 10px;
             font-family: 'JetBrains Mono', monospace;
         }
+        <style>
+    /* Additional CSS for new features */
+    
+    /* Code field clear buttons */
+    .code-field-clear {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        z-index: 100;
+        background: rgba(255,0,0,0.2);
+        border: 1px solid rgba(255,0,0,0.3);
+        border-radius: 4px;
+        color: #ff5555;
+        padding: 4px 8px;
+        font-size: 10px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .code-field-wrapper:hover .code-field-clear {
+        opacity: 1;
+    }
+    
+    /* Full screen preview */
+    .fullscreen-preview {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: white !important;
+    }
+    
+    /* Device simulation */
+    .device-frame {
+        position: relative;
+        background: #f0f0f0;
+        border-radius: 20px;
+        padding: 20px;
+        margin: 0 auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .device-frame.iphone {
+        width: 375px;
+        height: 812px;
+        border-radius: 40px;
+    }
+    
+    .device-frame.ipad {
+        width: 768px;
+        height: 1024px;
+        border-radius: 20px;
+    }
+    
+    .device-frame.desktop {
+        width: 1280px;
+        height: 720px;
+    }
+    
+    /* Visual CSS Editor */
+    .css-visual-editor {
+        position: fixed;
+        right: 20px;
+        bottom: 100px;
+        width: 300px;
+        background: rgba(20,20,20,0.95);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        z-index: 1000;
+        padding: 20px;
+    }
+    
+    /* Color Picker */
+    .color-picker {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(20,20,20,0.98);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        padding: 20px;
+        z-index: 10000;
+    }
+    
+    /* DOM Tree Visualizer */
+    .dom-tree {
+        background: rgba(10,10,10,0.9);
+        border-right: 1px solid var(--border-ui);
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+    }
+    
+    .dom-node {
+        padding: 4px 8px;
+        margin: 2px 0;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-left: 2px solid transparent;
+    }
+    
+    .dom-node:hover {
+        background: rgba(255,255,255,0.05);
+        border-left-color: #00ff00;
+    }
+    
+    /* API Tester */
+    .api-tester {
+        background: rgba(10,10,10,0.95);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    /* SEO Analyzer */
+    .seo-score {
+        font-size: 32px;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .seo-good { color: #00ff00; }
+    .seo-medium { color: #ffff00; }
+    .seo-poor { color: #ff0000; }
+    
+    /* Memory Monitor */
+    .memory-usage {
+        height: 100px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .memory-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #00ff00, #ffaa00, #ff0000);
+        width: 0%;
+        transition: width 0.5s;
+    }
+    
+    /* Animation Editor */
+    .animation-timeline {
+        height: 100px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 4px;
+        position: relative;
+    }
+    
+    .animation-keyframe {
+        position: absolute;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: #00ff00;
+    }
+    
+    /* Visual Responsive Editor */
+    .responsive-handle {
+        position: absolute;
+        background: rgba(0,100,255,0.5);
+        cursor: col-resize;
+    }
+    
+    /* Crash Analyzer */
+    .crash-report {
+        background: rgba(255,0,0,0.1);
+        border: 1px solid rgba(255,0,0,0.3);
+        border-radius: 8px;
+        padding: 15px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+    }
+    
+    /* Component Marketplace */
+    .component-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        transition: all 0.3s;
+    }
+    
+    .component-card:hover {
+        background: rgba(255,255,255,0.05);
+        transform: translateY(-2px);
+    }
+    
+    /* Time Travel Debug */
+    .time-travel-slider {
+        width: 100%;
+        height: 20px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        position: relative;
+    }
+    
+    /* Testing System */
+    .test-case {
+        padding: 10px;
+        margin: 5px 0;
+        background: rgba(255,255,255,0.02);
+        border-left: 3px solid rgba(255,255,255,0.1);
+    }
+    
+    .test-case.pass {
+        border-left-color: #00ff00;
+    }
+    
+    .test-case.fail {
+        border-left-color: #ff0000;
+    }
+    
+    /* Accessibility Analyzer */
+    .accessibility-issue {
+        padding: 8px 12px;
+        margin: 5px 0;
+        background: rgba(255,255,255,0.02);
+        border-left: 3px solid #ffaa00;
+    }
+    
+    /* Visual Event Editor */
+    .event-visualizer {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .event-node {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background: rgba(0,100,255,0.5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 10px;
+    }
+    
+    /* Export Options Panel */
+    .export-option {
+        padding: 15px;
+        margin: 10px 0;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .export-option:hover {
+        background: rgba(255,255,255,0.05);
+        transform: translateY(-2px);
+    }
+    
+    /* Auto-complete Advanced */
+    .advanced-autocomplete {
+        background: rgba(10,10,10,0.98);
+        border: 1px solid var(--border-ui);
+        border-radius: 4px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    /* Real-time Error Detection */
+    .error-line {
+        background: rgba(255,0,0,0.1) !important;
+    }
+    
+    .error-gutter {
+        background: rgba(255,0,0,0.3) !important;
+    }
+    
+    /* Project Analytics Dashboard */
+    .analytics-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px;
+    }
+    
+    /* Smart Suggestion Engine */
+    .suggestion-bubble {
+        position: absolute;
+        background: rgba(0,100,255,0.9);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        z-index: 10000;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* Dead Code Detection */
+    .dead-code {
+        opacity: 0.3;
+        background: rgba(255,0,0,0.05);
+    }
+    
+    /* CDN Manager */
+    .cdn-item {
+        padding: 10px;
+        margin: 5px 0;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border-ui);
+        border-radius: 4px;
+    }
+    
+    /* State Inspector */
+    .state-item {
+        padding: 8px;
+        margin: 4px 0;
+        background: rgba(255,255,255,0.02);
+        border-left: 3px solid transparent;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+    }
+    
+    /* Realtime Collaboration Cursors */
+    .user-cursor {
+        position: absolute;
+        width: 2px;
+        height: 20px;
+        background: #ff0000;
+        pointer-events: none;
+        z-index: 1000;
+    }
+</style>
+
+<!-- Add these HTML additions before closing </body> tag -->
+<div id="advanced-features-container" style="display: none;">
+    <!-- Full Screen Preview Mode -->
+    <div id="fullscreen-mode" class="hidden">
+        <div style="position: fixed; top: 10px; right: 10px; z-index: 10000;">
+            <button onclick="exitFullscreen()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white">
+                Exit Full Screen (ESC)
+            </button>
+        </div>
+    </div>
+    
+    <!-- Device Simulation Panel -->
+    <div id="device-simulator" class="fixed right-4 top-20 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="flex gap-2 mb-3">
+            <button onclick="setDevice('mobile')" class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-xs">
+                📱 Mobile
+            </button>
+            <button onclick="setDevice('tablet')" class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-xs">
+                📟 Tablet
+            </button>
+            <button onclick="setDevice('desktop')" class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-xs">
+                🖥️ Desktop
+            </button>
+            <button onclick="setDevice('responsive')" class="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-xs">
+                📐 Responsive
+            </button>
+        </div>
+        <div class="text-xs opacity-50">Rotate: <button onclick="rotateDevice()">↻</button></div>
+    </div>
+    
+    <!-- Visual CSS Editor -->
+    <div id="visual-css-editor" class="css-visual-editor hidden">
+        <div class="flex justify-between mb-3">
+            <span class="text-sm font-bold">Visual CSS Editor</span>
+            <button onclick="closeVisualEditor()" class="text-xs opacity-50 hover:opacity-100">✕</button>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label class="text-xs opacity-50 block mb-1">Background</label>
+                <input type="color" id="css-bg-color" class="w-full" onchange="applyVisualCSS('background', this.value)">
+            </div>
+            <div>
+                <label class="text-xs opacity-50 block mb-1">Color</label>
+                <input type="color" id="css-text-color" class="w-full" onchange="applyVisualCSS('color', this.value)">
+            </div>
+            <div>
+                <label class="text-xs opacity-50 block mb-1">Font Size</label>
+                <input type="range" min="8" max="72" value="16" id="css-font-size" class="w-full" onchange="applyVisualCSS('fontSize', this.value + 'px')">
+            </div>
+            <div>
+                <label class="text-xs opacity-50 block mb-1">Padding</label>
+                <input type="range" min="0" max="50" value="10" id="css-padding" class="w-full" onchange="applyVisualCSS('padding', this.value + 'px')">
+            </div>
+        </div>
+    </div>
+    
+    <!-- API Tester Panel -->
+    <div id="api-tester-panel" class="fixed left-4 top-20 w-96 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="flex justify-between mb-3">
+            <span class="text-sm font-bold">API Tester</span>
+            <button onclick="closeAPITester()" class="text-xs opacity-50 hover:opacity-100">✕</button>
+        </div>
+        <div class="space-y-3">
+            <select id="api-method" class="w-full bg-black border border-white/10 rounded p-2 text-sm">
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+                <option>PATCH</option>
+            </select>
+            <input id="api-url" type="text" placeholder="https://api.example.com/endpoint" class="w-full bg-black border border-white/10 rounded p-2 text-sm">
+            <textarea id="api-body" placeholder="Request body (JSON)" class="w-full bg-black border border-white/10 rounded p-2 text-sm h-24"></textarea>
+            <button onclick="testAPI()" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded text-sm">Send Request</button>
+            <div id="api-response" class="bg-black border border-white/10 rounded p-2 text-xs h-32 overflow-auto"></div>
+        </div>
+    </div>
+    
+    <!-- Color Picker -->
+    <div id="color-picker-modal" class="color-picker hidden">
+        <div id="color-picker"></div>
+        <div class="mt-3 flex gap-2">
+            <button onclick="applySelectedColor()" class="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded">Apply</button>
+            <button onclick="closeColorPicker()" class="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Export Options Modal -->
+    <div id="export-options-modal" class="fixed inset-0 bg-black/80 z-[10000] hidden flex items-center justify-center">
+        <div class="bg-black border border-white/10 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Export Project</h2>
+                <button onclick="closeExportModal()" class="text-2xl opacity-50 hover:opacity-100">×</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="export-option" onclick="exportAsSingleHTML()">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">📄</div>
+                        <div>
+                            <div class="font-bold">Single HTML File</div>
+                            <div class="text-xs opacity-50 mt-1">All-in-one HTML with inline CSS/JS</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="export-option" onclick="exportAsWebApp()">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">🌐</div>
+                        <div>
+                            <div class="font-bold">Web App (PWA)</div>
+                            <div class="text-xs opacity-50 mt-1">Progressive Web App with manifest</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="export-option" onclick="exportAsBloggerTheme()">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">✍️</div>
+                        <div>
+                            <div class="font-bold">Blogger Theme</div>
+                            <div class="text-xs opacity-50 mt-1">Optimized HTML for Blogger</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="export-option" onclick="exportAsAndroidAPK()">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">🤖</div>
+                        <div>
+                            <div class="font-bold">Android App (APK)</div>
+                            <div class="text-xs opacity-50 mt-1">Convert to Android APK</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="export-option" onclick="exportAsDesktopEXE()">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">💻</div>
+                        <div>
+                            <div class="font-bold">Desktop App (EXE)</div>
+                            <div class="text-xs opacity-50 mt-1">Windows executable with Electron</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="export-option" onclick="exportAsZIP()">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">📦</div>
+                        <div>
+                            <div class="font-bold">Project ZIP</div>
+                            <div class="text-xs opacity-50 mt-1">Complete project structure</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-white/5 rounded">
+                <div class="text-sm font-bold mb-2">Quick Deploy</div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="deployToNetlify()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-xs">Deploy to Netlify</button>
+                    <button onclick="deployToVercel()" class="px-4 py-2 bg-black hover:bg-gray-800 rounded text-xs">Deploy to Vercel</button>
+                    <button onclick="deployToGitHubPages()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-xs">Deploy to GitHub Pages</button>
+                    <button onclick="deployToFirebase()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded text-xs">Deploy to Firebase</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Project Folder Structure -->
+    <div id="folder-structure" class="hidden">
+        <div class="p-4 border-b border-white/10">
+            <span class="text-xs font-bold">Project Structure</span>
+        </div>
+        <div id="folder-tree" class="p-4">
+            <!-- Dynamic folder tree will be generated here -->
+        </div>
+    </div>
+    
+    <!-- DOM Tree Visualizer -->
+    <div id="dom-tree-panel" class="fixed left-4 bottom-4 w-64 h-96 bg-black/90 border border-white/10 rounded-lg z-50 hidden flex flex-col">
+        <div class="p-3 border-b border-white/10 flex justify-between items-center">
+            <span class="text-sm font-bold">DOM Tree</span>
+            <button onclick="closeDOMTree()" class="text-xs opacity-50 hover:opacity-100">✕</button>
+        </div>
+        <div id="dom-tree-content" class="flex-1 overflow-auto p-2">
+            <!-- DOM tree will be generated here -->
+        </div>
+    </div>
+    
+    <!-- State Inspector -->
+    <div id="state-inspector" class="fixed right-4 bottom-4 w-64 h-96 bg-black/90 border border-white/10 rounded-lg z-50 hidden flex flex-col">
+        <div class="p-3 border-b border-white/10 flex justify-between items-center">
+            <span class="text-sm font-bold">State Inspector</span>
+            <button onclick="closeStateInspector()" class="text-xs opacity-50 hover:opacity-100">✕</button>
+        </div>
+        <div id="state-content" class="flex-1 overflow-auto p-2">
+            <!-- State data will be shown here -->
+        </div>
+    </div>
+    
+    <!-- Network Inspector -->
+    <div id="network-inspector" class="fixed left-1/4 bottom-4 w-96 h-64 bg-black/90 border border-white/10 rounded-lg z-50 hidden flex flex-col">
+        <div class="p-3 border-b border-white/10 flex justify-between items-center">
+            <span class="text-sm font-bold">Network Inspector</span>
+            <button onclick="closeNetworkInspector()" class="text-xs opacity-50 hover:opacity-100">✕</button>
+        </div>
+        <div id="network-inspector-content" class="flex-1 overflow-auto p-2 text-xs">
+            <!-- Network requests will be shown here -->
+        </div>
+    </div>
+    
+    <!-- Backend API Builder -->
+    <div id="api-builder" class="fixed inset-0 bg-black/80 z-[10000] hidden flex items-center justify-center">
+        <div class="bg-black border border-white/10 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4">Backend API Builder</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-bold mb-2">Firebase Integration</h3>
+                    <input type="text" placeholder="Firebase Config JSON" class="w-full bg-black border border-white/10 rounded p-2 text-sm mb-2">
+                    <button onclick="setupFirebase()" class="w-full bg-orange-600 hover:bg-orange-700 py-2 rounded text-sm">Setup Firebase</button>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2">Supabase Integration</h3>
+                    <input type="text" placeholder="Supabase URL" class="w-full bg-black border border-white/10 rounded p-2 text-sm mb-2">
+                    <input type="text" placeholder="Supabase Key" class="w-full bg-black border border-white/10 rounded p-2 text-sm mb-2">
+                    <button onclick="setupSupabase()" class="w-full bg-green-600 hover:bg-green-700 py-2 rounded text-sm">Setup Supabase</button>
+                </div>
+            </div>
+            <div class="mt-6">
+                <h3 class="font-bold mb-2">API Endpoints</h3>
+                <div class="space-y-2">
+                    <div class="flex gap-2">
+                        <select class="bg-black border border-white/10 rounded p-2 text-sm">
+                            <option>GET</option>
+                            <option>POST</option>
+                        </select>
+                        <input type="text" placeholder="/api/users" class="flex-1 bg-black border border-white/10 rounded p-2 text-sm">
+                        <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Component Marketplace -->
+    <div id="component-marketplace" class="fixed inset-0 bg-black/80 z-[10000] hidden flex items-center justify-center">
+        <div class="bg-black border border-white/10 rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4">Component Marketplace</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="component-card">
+                    <div class="text-lg mb-2">📊 Chart Component</div>
+                    <div class="text-xs opacity-50 mb-2">Interactive charts and graphs</div>
+                    <button onclick="importComponent('chart')" class="w-full bg-blue-600 hover:bg-blue-700 py-1 rounded text-xs">Import</button>
+                </div>
+                <div class="component-card">
+                    <div class="text-lg mb-2">🎨 UI Kit</div>
+                    <div class="text-xs opacity-50 mb-2">Complete UI component set</div>
+                    <button onclick="importComponent('ui-kit')" class="w-full bg-blue-600 hover:bg-blue-700 py-1 rounded text-xs">Import</button>
+                </div>
+                <div class="component-card">
+                    <div class="text-lg mb-2">🔔 Notification</div>
+                    <div class="text-xs opacity-50 mb-2">Toast and notification system</div>
+                    <button onclick="importComponent('notification')" class="w-full bg-blue-600 hover:bg-blue-700 py-1 rounded text-xs">Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Animation Editor -->
+    <div id="animation-editor" class="fixed left-1/2 transform -translate-x-1/2 top-20 w-96 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="flex justify-between mb-3">
+            <span class="text-sm font-bold">Animation Editor</span>
+            <button onclick="closeAnimationEditor()" class="text-xs opacity-50 hover:opacity-100">✕</button>
+        </div>
+        <div class="animation-timeline mb-3">
+            <div class="animation-keyframe" style="left: 25%;"></div>
+            <div class="animation-keyframe" style="left: 50%;"></div>
+            <div class="animation-keyframe" style="left: 75%;"></div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="addKeyframe()" class="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded text-xs">Add Keyframe</button>
+            <button onclick="playAnimation()" class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 rounded text-xs">Play</button>
+        </div>
+    </div>
+    
+    <!-- SEO Analyzer -->
+    <div id="seo-analyzer" class="fixed right-20 top-20 w-64 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="seo-score seo-good">92</div>
+        <div class="text-center text-xs mb-3">SEO Score</div>
+        <div class="space-y-2 text-xs">
+            <div class="flex justify-between">
+                <span>Title Tag:</span>
+                <span class="text-green-400">✓</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Meta Description:</span>
+                <span class="text-green-400">✓</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Heading Structure:</span>
+                <span class="text-yellow-400">⚠</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Memory Monitor -->
+    <div id="memory-monitor" class="fixed right-20 top-40 w-64 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="text-sm font-bold mb-2">Memory Usage</div>
+        <div class="memory-usage mb-2">
+            <div class="memory-bar" id="memory-bar"></div>
+        </div>
+        <div class="text-xs flex justify-between">
+            <span>Heap: <span id="heap-size">45.2 MB</span></span>
+            <span>DOM: <span id="dom-size">12.8 MB</span></span>
+        </div>
+    </div>
+    
+    <!-- Crash Analyzer -->
+    <div id="crash-analyzer" class="fixed inset-0 bg-black/80 z-[10000] hidden flex items-center justify-center">
+        <div class="bg-black border border-white/10 rounded-lg p-6 max-w-2xl w-full mx-4">
+            <h2 class="text-xl font-bold mb-4 text-red-400">Crash Analysis Report</h2>
+            <div class="crash-report mb-4">
+                <div class="font-bold mb-2">Error: TypeError: undefined is not a function</div>
+                <div>Line: 42</div>
+                <div>File: script.js</div>
+                <div>Stack Trace: at button.onclick (script.js:42:15)</div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="fixCrash()" class="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded">Auto Fix</button>
+                <button onclick="closeCrashAnalyzer()" class="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded">Ignore</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Testing System -->
+    <div id="testing-system" class="fixed left-20 bottom-20 w-80 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="flex justify-between mb-3">
+            <span class="text-sm font-bold">Test Runner</span>
+            <button onclick="runAllTests()" class="text-xs bg-green-600 hover:bg-green-700 px-3 py-1 rounded">Run All</button>
+        </div>
+        <div class="space-y-2 max-h-64 overflow-auto">
+            <div class="test-case pass">
+                <div class="font-bold">Test: Button Click</div>
+                <div class="text-xs opacity-50">✓ Passed in 45ms</div>
+            </div>
+            <div class="test-case fail">
+                <div class="font-bold">Test: Form Validation</div>
+                <div class="text-xs opacity-50">✗ Failed - Expected true, got false</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Accessibility Analyzer -->
+    <div id="accessibility-analyzer" class="fixed left-20 top-40 w-80 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="text-sm font-bold mb-3">Accessibility Issues (3)</div>
+        <div class="space-y-2 max-h-64 overflow-auto">
+            <div class="accessibility-issue">
+                <div class="font-bold">Missing alt attribute</div>
+                <div class="text-xs opacity-50">Image tags should have alt text</div>
+            </div>
+            <div class="accessibility-issue">
+                <div class="font-bold">Low contrast</div>
+                <div class="text-xs opacity-50">Text color #888 on #000 background</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dead Code Detector -->
+    <div id="dead-code-detector" class="fixed right-1/4 top-40 w-80 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="text-sm font-bold mb-3">Dead Code Found (5 items)</div>
+        <div class="text-xs space-y-1">
+            <div>• Unused function calculateOld()</div>
+            <div>• Unused CSS class .old-style</div>
+            <div>• Unreachable code at line 128</div>
+        </div>
+        <button onclick="removeDeadCode()" class="w-full mt-3 bg-red-600 hover:bg-red-700 py-2 rounded text-sm">Remove All</button>
+    </div>
+    
+    <!-- CDN Manager -->
+    <div id="cdn-manager" class="fixed left-1/3 top-40 w-80 bg-black/90 border border-white/10 rounded-lg p-4 z-50 hidden">
+        <div class="text-sm font-bold mb-3">CDN Libraries</div>
+        <div class="space-y-2">
+            <div class="cdn-item">
+                <div class="font-bold">jQuery 3.6.0</div>
+                <div class="text-xs opacity-50">cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js</div>
+            </div>
+            <div class="cdn-item">
+                <div class="font-bold">Bootstrap 5.2.0</div>
+                <div class="text-xs opacity-50">cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Visual Responsive Editor -->
+    <div id="responsive-editor" class="fixed inset-0 bg-black/50 z-[9999] hidden">
+        <div class="absolute inset-0" id="responsive-canvas">
+            <div class="responsive-handle" style="right: 0; top: 0; bottom: 0; width: 4px;"></div>
+            <div class="responsive-handle" style="left: 0; top: 0; bottom: 0; width: 4px;"></div>
+        </div>
+    </div>
+</div>
+
+
     </style>
 </head>
 <body class="flex flex-col">
@@ -1266,6 +2008,7 @@ window.ZelviorUtils = utils;`
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>${css}</style>
+    
     <script>
         // Safe JSON data
         try {
